@@ -2,7 +2,7 @@ import express from "express";
 import axios from "axios";
 
 const app = express();
-const port = 3000;
+const port = 4000;
 
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
@@ -13,8 +13,10 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", async (req, res) => {
   try {
     const response = await axios.get("https://bored-api.appbrewery.com/random");
+    // console.log(response);
     const result = response.data;
     res.render("index.ejs", { data: result });
+    // res.send("Hey");
   } catch (error) {
     console.error("Failed to make request:", error.message);
     res.render("index.ejs", {
@@ -25,7 +27,18 @@ app.get("/", async (req, res) => {
 
 app.post("/", async (req, res) => {
   console.log(req.body);
-
+  try {
+    const response = await axios.get(`https://bored-api.appbrewery.com/filter?type=${req.body.type}&participants=${req.body.participants}`);
+    console.log(response.data);
+    const num = Math.floor(Math.random() * response.data.length);
+    res.render("index.ejs", {data: response.data[num]});
+    res.send("Okay");
+  } catch (error) {
+    console.error("Failed to make request:", error.message);
+    res.render("index.ejs", {
+      error: error.message,
+    });
+  }
   // Step 2: Play around with the drop downs and see what gets logged.
   // Use axios to make an API request to the /filter endpoint. Making
   // sure you're passing both the type and participants queries.
